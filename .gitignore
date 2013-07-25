@@ -1,3 +1,6 @@
+.idea/workspace.xml
+.idea/uiDesigner.xml
+out/
 .eunit
 deps
 *.o
