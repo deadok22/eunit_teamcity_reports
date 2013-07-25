@@ -10,8 +10,7 @@
 -export([init/1, handle_begin/3, handle_end/3, handle_cancel/3,
          terminate/2]).
 
--record(group, {name = "", location, depth = 0}).
--record(state, {groups_stack = []}).
+-include("eunit_teamcity.hrl").
 
 %%
 %% Behaviour functions
@@ -170,7 +169,13 @@ print_teamcity_message(fail_group, Data, _State) ->
     print_group_failed_message(Data),
     print_group_teamcity_message("testSuiteFinished", Data);
 print_teamcity_message(fail_test, _Data, _State) ->
-    whaaaat; %TODO find out when this message is issued
+    whaaaat; %TODO handle test cancellation. See message example below
+%% handle_cancel test [{id,[1]},
+%% {reason,timeout},
+%% {desc,<<"module 'eunit_teamcity_tests'">>},
+%% {source,{eunit_teamcity_tests,handle_begin_output_test,0}},
+%% {line,0}]
+
 %%     print_test_failed_message(Data),
 %%     print_test_teamcity_message("testFinished", Data);
 print_teamcity_message(Type, Details, _State) ->
@@ -240,14 +245,16 @@ join_and_print_teamcity_message(Attributes) ->
 
 get_location(Data) ->
     case proplists:get_value(source, Data) of
-        undefined ->
-            parse_module_name(proplists:get_value(desc, Data));
         {Module, Function, _Arity} ->
             case proplists:get_value(line, Data) of
                 Line when is_integer(Line) ->
                     {Module, Function, Line};
                 _ -> {Module, Function, -1}
-            end
+            end;
+        {Module} ->
+            {Module};
+        undefined ->
+            parse_module_name(proplists:get_value(desc, Data))
     end.
 
 get_test_failed_details(Data) ->
