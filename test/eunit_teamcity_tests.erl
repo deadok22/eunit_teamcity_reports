@@ -7,7 +7,7 @@
 -include("eunit_teamcity.hrl").
 
 get_run_function_command(Function, Arguments) ->
-    ErlPrefix = "erl -pa \"out/production/eunit_teamcity\" -run -eval \"",
+    ErlPrefix = "erl -pa ebin -run -eval \"",
     ErlSuffix = "\" -s init stop -noshell",
     FunctionName = "eunit_teamcity:" ++ atom_to_list(Function),
     ArgumentsString = get_arguments_string(Arguments),
