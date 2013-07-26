@@ -17,6 +17,7 @@ start() ->
     start([]).
 
 start(Options) ->
+%% noinspection ErlangUnresolvedFunction
     eunit_listener:start(?MODULE, Options).
 
 init(_Options) ->
@@ -107,7 +108,8 @@ begin_group(Group, Data, State) ->
                      name_only_group -> name_only_group_attributes(Group);
                      _ -> []
                  end,
-    do_begin_group(is_pseudo_group(Group, State), Group, Attributes, Data, State).
+    IsPseudoGroup = is_pseudo_group(Group, State),
+    do_begin_group(IsPseudoGroup, Group, Attributes, Data, State).
 
 do_begin_group(false = _IsPseudoGroup, Group, Attributes, Data, State) ->
     State1 = enter_new_test_item(Data, State),
@@ -208,7 +210,7 @@ create_group_from_function(Data) ->
     FunctionLocation = get_location(Data),
     GroupLocation = get_module(FunctionLocation),
     GroupName = atom_to_list(GroupLocation),
-    GroupDepth = get_test_item_depth(Data) - 1,
+    GroupDepth = get_test_item_depth(Data),
     #group{name = GroupName, location = GroupLocation, depth = GroupDepth}.
 
 create_cancel_test_info(Data, _State) ->
