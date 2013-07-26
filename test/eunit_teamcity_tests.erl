@@ -23,10 +23,29 @@ escape_quotes(String) ->
                                 (X) -> X
                             end, String)).
 
-handle_begin_output_test() ->
-    Data = [{id, [1]},
-            {source, {test_module}},
-            {desc, <<"module 'test_module'">>}],
-    State = #state{},
-    Command = get_run_function_command(handle_begin, [group, Data, State]),
-    ?assertCmdOutput("##teamcity[testSuiteStarted name='test_module' locationHint='eunit://test_module']\n", Command).
+
+group_output_test_() ->
+    {"Check reporter produces valid output when handling group events",
+     setup,
+     fun() ->
+         Data = [{id, [1]},
+                 {desc, <<"module 'test_module'">>}],
+         State = #state{},
+         [group, Data, State]
+     end,
+     fun(_) -> ok end,
+     fun(GroupEventArgs) ->
+         [
+             {
+                 "begin_group is handled correctly",
+                 ?_assertCmdOutput("##teamcity[testSuiteStarted name='test_module' locationHint='eunit://test_module']\n",
+                                   get_run_function_command(handle_begin, GroupEventArgs))
+             },
+             {
+                 "end_group is handled correctly",
+                 ?_assertCmdOutput("##teamcity[testSuiteFinished name='test_module' locationHint='eunit://test_module']\n",
+                                   get_run_function_command(handle_end, GroupEventArgs))
+             }
+         ]
+     end
+    }.
